@@ -1,0 +1,17 @@
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스.xlsx" " 기저귀"
+
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스.xlsx" --keyword " 베피스+기저귀" " 키퍼스+기저귀" " 코디(codi)"
+
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스.xlsx" "C:/Users/Rainbow Brain/Desktop/네이버뉴스2.xlsx" --keyword " 베피스+기저귀" " 키퍼스+기저귀" " 코디(codi)"
+
+python -m cluster.py "C:/Users/Rainbow Brain/Desktop/네이버뉴스.xlsx" " 베피스+기저귀"
+
+
+python main.py "C:/Users/user/Desktop/(Result)_네이버뉴스.xlsx" --keyword " 기저귀" " 마스크+판매" " 마스크+제조" " 마스크+생산" " 물티슈" " 생리대" " 엠에스에스" "모나리자" "쌍용씨앤비"
+
+
+pip install JPype1-0.5.7-cp310-none-win_amd64.whl
+
+pip install JPype1-1.4.0-cp310-cp310-win_amd64.whl
+
+pip install JPype1-1.1.2-cp38-cp38-win_amd64.whl
