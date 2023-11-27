@@ -1,0 +1,8 @@
+1. python 3.10 버전설치
+2. 파이참 실행후 file-settings-project:clustering-python interpreter-venv~.exe 선택
+
+2. vscode실행 new terminal
+   pip install -r requirements.txt
+3. nltk_data.py 실행(자동설치)
+4. 에러발생시 에러메시지확인 후 조치
+
