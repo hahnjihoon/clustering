@@ -17,13 +17,22 @@ python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes 1.xlsx" --keywor
 
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes 2.xlsx" "news"
 
-python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes 2.xlsx" --keyword "news" "global" "president"
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes 3.xlsx" --keyword "news" "global" "president"
 
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews 1.xlsx" --keyword "모나리자" "쌍용씨앤비"
 
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews 1.xlsx" "쌍용씨앤비"
 
-python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews 1.xlsx" "모나리자"
+
+
+
+
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews.xlsx" "ESG"
+
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews.xlsx" --keyword "ESG" "CF100" "RE100"
+
+
+
 
 
 

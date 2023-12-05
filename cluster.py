@@ -27,6 +27,15 @@ def clustering(adres_list, filna_list):
     data = pd.read_excel(adres_list, header=0, sheet_name=filna_list)
     # data['요약 내용'] = data['요약 내용'].fillna('')
 
+    # 추가 날짜컬럼
+    data["날짜 (yyyymmdd)"] = pd.DataFrame(data["날짜 (yyyymmdd)"])
+    data["날짜 (yyyymmdd)"] = pd.to_datetime(data["날짜 (yyyymmdd)"])
+    data["날짜 (yyyymmdd)"] = data["날짜 (yyyymmdd)"].dt.strftime('%Y%m%d')
+
+    data["게시일 (post_date)"] = pd.DataFrame(data["게시일 (post_date)"])
+    data["게시일 (post_date)"] = pd.to_datetime(data["게시일 (post_date)"])
+    data["게시일 (post_date)"] = data["게시일 (post_date)"].dt.strftime('%Y%m%d')
+
     # token용 배열생성
     summary_data = pd.DataFrame(data["제목"])
     summary_data = summary_data.assign(요약내용=data["요약 내용"])
@@ -127,6 +136,15 @@ def clustering_lot(adres_list, filna_list):
                     print(f'시트명 {filna} :: ', adres)
                     # 빈칸 공백처리
                     data['요약 내용'].fillna('', inplace=True)
+
+                    # 추가 날짜컬럼
+                    data["날짜 (yyyymmdd)"] = pd.DataFrame(data["날짜 (yyyymmdd)"])
+                    data["날짜 (yyyymmdd)"] = pd.to_datetime(data["날짜 (yyyymmdd)"])
+                    data["날짜 (yyyymmdd)"] = data["날짜 (yyyymmdd)"].dt.strftime('%Y%m%d')
+
+                    data["게시일 (post_date)"] = pd.DataFrame(data["게시일 (post_date)"])
+                    data["게시일 (post_date)"] = pd.to_datetime(data["게시일 (post_date)"])
+                    data["게시일 (post_date)"] = data["게시일 (post_date)"].dt.strftime('%Y%m%d')
 
                     # 요약 내용이 5개 미만인 경우
                     if len(data['요약 내용']) < 5:
