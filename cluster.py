@@ -3,13 +3,11 @@ import sys
 import warnings
 import pandas as pd
 import logging
-import chardet
 
 from konlpy.tag import Okt
 from nltk.tokenize import word_tokenize
-from nltk.tokenize import sent_tokenize
 from sklearn.cluster import KMeans
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 warnings.filterwarnings('ignore')
 
