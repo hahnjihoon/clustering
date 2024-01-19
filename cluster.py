@@ -27,12 +27,34 @@ def clustering(adres_list, filna_list):
 
     # 추가 날짜컬럼
     data["날짜 (yyyymmdd)"] = pd.DataFrame(data["날짜 (yyyymmdd)"])
-    data["날짜 (yyyymmdd)"] = pd.to_datetime(data["날짜 (yyyymmdd)"])
-    data["날짜 (yyyymmdd)"] = data["날짜 (yyyymmdd)"].dt.strftime('%Y%m%d')
+    # if not pd.DataFrame(data["날짜 (yyyymmdd)"]).empty and len(str(data["날짜 (yyyymmdd)"][0])) > 8:
+    #     data["날짜 (yyyymmdd)"] = pd.to_datetime(data["날짜 (yyyymmdd)"])
+    #     data["날짜 (yyyymmdd)"] = data["날짜 (yyyymmdd)"].dt.strftime('%Y%m%d')
+    #
+    #     data["게시일 (post_date)"] = pd.DataFrame(data["게시일 (post_date)"])
+    #     data["게시일 (post_date)"] = pd.to_datetime(data["게시일 (post_date)"])
+    #     data["게시일 (post_date)"] = data["게시일 (post_date)"].dt.strftime('%Y%m%d')
+    # else:
+    #     print("데이터가 하나도 없다dddddd") # 결과를 엑셀 파일로 저장
+    #     output_file = os.path.splitext(adres_list)[0] + '_clustered.xlsx'
+    #     data.to_excel(output_file, index=False, sheet_name=filna_list)
+    #     exit()
+    data["날짜 (yyyymmdd)"] = pd.DataFrame(data["날짜 (yyyymmdd)"])
+    if not pd.DataFrame(data["날짜 (yyyymmdd)"]).empty and len(str(data["날짜 (yyyymmdd)"][0])) > 8:
+        data["날짜 (yyyymmdd)"] = pd.to_datetime(data["날짜 (yyyymmdd)"])
+        data["날짜 (yyyymmdd)"] = data["날짜 (yyyymmdd)"].dt.strftime('%Y%m%d')
 
-    data["게시일 (post_date)"] = pd.DataFrame(data["게시일 (post_date)"])
-    data["게시일 (post_date)"] = pd.to_datetime(data["게시일 (post_date)"])
-    data["게시일 (post_date)"] = data["게시일 (post_date)"].dt.strftime('%Y%m%d')
+        data["게시일 (post_date)"] = pd.DataFrame(data["게시일 (post_date)"])
+        data["게시일 (post_date)"] = pd.to_datetime(data["게시일 (post_date)"])
+        data["게시일 (post_date)"] = data["게시일 (post_date)"].dt.strftime('%Y%m%d')
+        exit()
+
+    if pd.DataFrame(data["날짜 (yyyymmdd)"]).empty:
+        print("데이터가 하나도 없다(키워드1개)")
+        # 결과를 엑셀 파일로 저장
+        output_file = os.path.splitext(adres_list)[0] + '_clustered.xlsx'
+        data.to_excel(output_file, index=False, sheet_name=filna_list)
+        exit()
 
     # token용 배열생성
     summary_data = pd.DataFrame(data["제목"])
@@ -97,7 +119,7 @@ def clustering(adres_list, filna_list):
     # print("word_list ::: ", word_list.astype(str).tolist())
         
     # 군집화
-    kmeans = KMeans(n_clusters=5, random_state=42) #default42
+    kmeans = KMeans(n_clusters=10, random_state=42) #default42
     kmeans.fit(X)
 
     # 행별 군집플래그 부여
@@ -125,7 +147,7 @@ def clustering(adres_list, filna_list):
 def clustering_lot(adres_list, filna_list):
     try:
         for adres in adres_list:
-            i=0
+            i = 0
             output_file = os.path.splitext(adres)[i] + '_clustered.xlsx'
             print(f'파일명 {i} :: ', adres)
             with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
@@ -137,12 +159,20 @@ def clustering_lot(adres_list, filna_list):
 
                     # 추가 날짜컬럼
                     data["날짜 (yyyymmdd)"] = pd.DataFrame(data["날짜 (yyyymmdd)"])
-                    data["날짜 (yyyymmdd)"] = pd.to_datetime(data["날짜 (yyyymmdd)"])
-                    data["날짜 (yyyymmdd)"] = data["날짜 (yyyymmdd)"].dt.strftime('%Y%m%d')
+                    if not pd.DataFrame(data["날짜 (yyyymmdd)"]).empty and len(str(data["날짜 (yyyymmdd)"][0])) > 8:
+                        data["날짜 (yyyymmdd)"] = pd.to_datetime(data["날짜 (yyyymmdd)"])
+                        data["날짜 (yyyymmdd)"] = data["날짜 (yyyymmdd)"].dt.strftime('%Y%m%d')
 
-                    data["게시일 (post_date)"] = pd.DataFrame(data["게시일 (post_date)"])
-                    data["게시일 (post_date)"] = pd.to_datetime(data["게시일 (post_date)"])
-                    data["게시일 (post_date)"] = data["게시일 (post_date)"].dt.strftime('%Y%m%d')
+                        data["게시일 (post_date)"] = pd.DataFrame(data["게시일 (post_date)"])
+                        data["게시일 (post_date)"] = pd.to_datetime(data["게시일 (post_date)"])
+                        data["게시일 (post_date)"] = data["게시일 (post_date)"].dt.strftime('%Y%m%d')
+                        continue
+
+                    if pd.DataFrame(data["날짜 (yyyymmdd)"]).empty:
+                        print("데이터가 하나도 없다")
+                        # 결과를 엑셀 파일로 저장
+                        data.to_excel(writer, index=False, sheet_name=f"{filna}")
+                        continue
 
                     # 요약 내용이 5개 미만인 경우
                     if len(data['요약 내용']) < 5:
@@ -162,7 +192,7 @@ def clustering_lot(adres_list, filna_list):
                         # print("word_list ::: ", word_list.astype(str).tolist())
 
                         # 군집화
-                        kmeans = KMeans(n_clusters=5, random_state=42)  # default42
+                        kmeans = KMeans(n_clusters=10, random_state=42)  # default42
                         kmeans.fit(X)
 
                         # 행별 군집플래그 부여
@@ -218,8 +248,9 @@ def clustering_lot(adres_list, filna_list):
 
                     # 결과를 엑셀 파일로 저장
                     data.to_excel(writer, index=False, sheet_name=f"{filna}")
-    except:
+    except Exception as e:
         print("군집화중 오류발생")
+        print(f"An unexpected error occurred: {str(e)}")
 
 if __name__ == "__main__":
     if len(sys.argv) == 3:

@@ -5,6 +5,10 @@ python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스.xlsx" --
 
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews.xlsx" "쌍용씨앤비"
 
+
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스 1.xlsx" "Result"
+
+
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews.xlsx" --keyword "쌍용씨앤비" "테스트"
 
 
@@ -32,7 +36,12 @@ python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews.xlsx" "ESG"
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews.xlsx" --keyword "ESG" "CF100" "RE100"
 
 
+에너지 자산  친환경 에너지  신재생 에너지  (Result)_네이버뉴스
 
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스.xlsx" --keyword "에너지 자산" "친환경 에너지" "신재생 에너지"
+
+
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes.xlsx" --keyword "Energy Asset" "Eco-friendly Energy" "New Renewable Energy"
 
 
 
