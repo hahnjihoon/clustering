@@ -6,7 +6,7 @@ python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스.xlsx" --
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews.xlsx" "쌍용씨앤비"
 
 
-python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스 1.xlsx" "Result"
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes keyword.xlsx" "Result"
 
 
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews.xlsx" --keyword "쌍용씨앤비" "테스트"
@@ -14,9 +14,9 @@ python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews.xlsx" --keywo
 
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes 1.xlsx" "Carborn Free"
 
-python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes 1.xlsx" --keyword "Carborn Free" "CF100"
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스 2.xlsx" --keyword "친환경 에너지" "신재생 에너지"
 
-
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스 2.xlsx" "Result"
 
 
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes 2.xlsx" "news"
