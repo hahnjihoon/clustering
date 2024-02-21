@@ -16,8 +16,8 @@ python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes 1.xlsx" "Carborn
 
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스 2.xlsx" --keyword "친환경 에너지" "신재생 에너지"
 
-python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스 2.xlsx" "Result"
-
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스 1.xlsx" "Result"
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스 1.xlsx" --keyword "lotte" "samyang"
 
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes 2.xlsx" "news"
 

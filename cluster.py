@@ -16,6 +16,9 @@ logging.basicConfig(level=logging.DEBUG,  # 로그 레벨 설정 (DEBUG, INFO, W
 
 logger = logging.getLogger(__name__)
 
+cluster_number = 25
+
+#파일1개 시트1개일때
 def clustering(adres_list, filna_list):
     # utf-8, ascii 확인
     # encode = chardet.detect(adres_list)
@@ -69,7 +72,7 @@ def clustering(adres_list, filna_list):
         # print("word_list ::: ", word_list.astype(str).tolist())
 
         # 군집화
-        kmeans = KMeans(n_clusters=10, random_state=42)  # default42
+        kmeans = KMeans(n_clusters=cluster_number, random_state=42)  # default42
         kmeans.fit(X)
 
         # 행별 군집플래그 부여
@@ -90,11 +93,19 @@ def clustering(adres_list, filna_list):
         data['tokens'] = parsing_row_words_list
         # print('parsing_row_words_list::::: ', parsing_row_words_list)
 
+        # 라벨 카운팅
+        label_counts = data['cluster_label'].value_counts()
+        most_common_label = label_counts.idxmax()
+
+        # 카운팅된 가장많은수를 가진 숫자를 0으로 0은 그숫자로 치환
+        data['cluster_label'] = data['cluster_label'] = data['cluster_label'].replace({most_common_label: 0, 0: most_common_label})
+
         # 결과를 엑셀 파일로 저장
         output_file = os.path.splitext(adres_list)[0] + '_clustered.xlsx'
         data.to_excel(output_file, index=False, sheet_name=filna_list)
         exit()
 
+    print('정상일때 로직시작 ::')
     # 요약내용컬럼 벡터화
     vectorizer = TfidfVectorizer()  # 벡터 초기화
     X = vectorizer.fit_transform(data['제목'])
@@ -102,33 +113,49 @@ def clustering(adres_list, filna_list):
     # 단어 파싱 리스트
     word_list = vectorizer.get_feature_names_out()  # 벡터를 단어로바꿈
     # print("word_list ::: ", word_list.astype(str).tolist())
-        
+    # print('단어파싱리스트 ::', word_list)
+
     # 군집화
-    kmeans = KMeans(n_clusters=10, random_state=42) #default42
+    kmeans = KMeans(n_clusters=cluster_number, random_state=42) #default42
     kmeans.fit(X)
 
     # 행별 군집플래그 부여
     cluster_labels = kmeans.labels_
     data['cluster_label'] = cluster_labels
+    # print('행별 군집플래그 ::', data['cluster_label'])
 
     # 행별 단어 모음 추가
-    parsing_row_words_list = []
+    parsing_row_words_list = [] #밑에서담을 빈배열초기화
     row_count = len(summary_data['제목'])
+    print('row_count ::', row_count)
 
     okt = Okt()
     for i in range(row_count):
-        nouns_row = okt.nouns(str(summary_data['제목'][i]))
+        nouns_row = okt.nouns(str(summary_data['제목'][i])) #명사만 추출해서담는데 (한국어)
         if not nouns_row:
-            nouns_row = word_tokenize(summary_data['제목'][i])
+            nouns_row = word_tokenize(summary_data['제목'][i]) #추출안됐으면 word_tokenize로 다시돌려 (영어)
         parsing_row_words_list.append(nouns_row)
 
     data['tokens'] = parsing_row_words_list
     # print('parsing_row_words_list::::: ', parsing_row_words_list)
 
+    #라벨 카운팅
+    label_counts = data['cluster_label'].value_counts()
+    most_common_label = label_counts.idxmax()
+    # print('label_counts :: ', label_counts)
+    # print('most_common_label :: ', most_common_label)
+
+    #카운팅된 가장많은수를 가진 숫자를 0으로 0은 그숫자로 치환
+    # data['cluster_label'] = data['cluster_label'].apply(lambda x: most_common_label if x == 0 else 0)
+    data['cluster_label'] = data['cluster_label'] = data['cluster_label'].replace({most_common_label: 0, 0: most_common_label})
+    # print('치환된 라벨값(0이항상많아야됨) :: ', data['cluster_label'])
+
     # 결과를 엑셀 파일로 저장
     output_file = os.path.splitext(adres_list)[0] + '_clustered.xlsx'
     data.to_excel(output_file, index=False, sheet_name=filna_list)
 
+
+#파일n개 시트n개일때
 def clustering_lot(adres_list, filna_list):
     try:
         for adres in adres_list:
@@ -177,7 +204,7 @@ def clustering_lot(adres_list, filna_list):
                         # print("word_list ::: ", word_list.astype(str).tolist())
 
                         # 군집화
-                        kmeans = KMeans(n_clusters=10, random_state=42)  # default42
+                        kmeans = KMeans(n_clusters=cluster_number, random_state=42)  # default42
                         kmeans.fit(X)
 
                         # 행별 군집플래그 부여
@@ -198,6 +225,14 @@ def clustering_lot(adres_list, filna_list):
                         data['tokens'] = parsing_row_words_list
                         # print('parsing_row_words_list::::: ', parsing_row_words_list)
 
+                        # 라벨 카운팅
+                        label_counts = data['cluster_label'].value_counts()
+                        most_common_label = label_counts.idxmax()
+
+                        # 카운팅된 가장많은수를 가진 숫자를 0으로 0은 그숫자로 치환
+                        data['cluster_label'] = data['cluster_label'] = data['cluster_label'].replace(
+                            {most_common_label: 0, 0: most_common_label})
+
                         # 결과를 엑셀 파일로 저장
                         data.to_excel(writer, index=False, sheet_name=f"{filna}")
                         continue
@@ -210,7 +245,7 @@ def clustering_lot(adres_list, filna_list):
                     word_list = vectorizer.get_feature_names_out()
 
                     # 군집화
-                    kmeans = KMeans(n_clusters=10, random_state=42)
+                    kmeans = KMeans(n_clusters=cluster_number, random_state=42)
                     kmeans.fit(X)
 
                     # 행별 군집플래그 부여
@@ -230,6 +265,14 @@ def clustering_lot(adres_list, filna_list):
                         parsing_row_words_list.append(nouns_row)
 
                     data['tokens'] = parsing_row_words_list
+
+                    # 라벨 카운팅
+                    label_counts = data['cluster_label'].value_counts()
+                    most_common_label = label_counts.idxmax()
+
+                    # 카운팅된 가장많은수를 가진 숫자를 0으로 0은 그숫자로 치환
+                    data['cluster_label'] = data['cluster_label'] = data['cluster_label'].replace(
+                        {most_common_label: 0, 0: most_common_label})
 
                     # 결과를 엑셀 파일로 저장
                     data.to_excel(writer, index=False, sheet_name=f"{filna}")
