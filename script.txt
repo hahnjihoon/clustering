@@ -30,6 +30,11 @@ python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews 1.xlsx" "ÏåçÏ
 
 
 
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes keyword 1.xlsx" "Result"
+
+
+
+
 
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews.xlsx" "ESG"
 

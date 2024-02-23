@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.DEBUG,  # 로그 레벨 설정 (DEBUG, INFO, W
 
 logger = logging.getLogger(__name__)
 
-cluster_number = 25
+
 
 #파일1개 시트1개일때
 def clustering(adres_list, filna_list):
@@ -26,6 +26,9 @@ def clustering(adres_list, filna_list):
 
     # 데이터불러옴
     data = pd.read_excel(adres_list, header=0, sheet_name=filna_list)
+
+    cluster_number = 25
+    data_length = len(data)
 
     data["날짜 (yyyymmdd)"] = pd.DataFrame(data["날짜 (yyyymmdd)"])
     if not pd.DataFrame(data["날짜 (yyyymmdd)"]).empty and len(str(data["날짜 (yyyymmdd)"][0])) > 8:
@@ -53,13 +56,13 @@ def clustering(adres_list, filna_list):
     # print("요약내용 있는지없는지 :: ", data['요약 내용'])
 
     # 요약 내용이 5개 미만인 경우
-    if len(data['제목']) < 5:
-        print("데이터가 적어서 군집이 형성이 안돼요")
-        data['cluster_label'] = ''
-        data['tokens'] = ''
-        output_file = os.path.splitext(adres_list)[0] + '_clustered.xlsx'
-        data.to_excel(output_file, index=False, sheet_name=filna_list)
-        exit()
+    # if len(data['제목']) < 5:
+    #     print("데이터가 적어서 군집이 형성이 안돼요")
+    #     data['cluster_label'] = ''
+    #     data['tokens'] = ''
+    #     output_file = os.path.splitext(adres_list)[0] + '_clustered.xlsx'
+    #     data.to_excel(output_file, index=False, sheet_name=filna_list)
+    #     exit()
 
     if not any(data['제목'].apply(lambda x: bool(x.strip()))):
         #요약내용에 .apply(함수)를 적용시키는데 어떤함수냐 lambda x : x를 .strip시작끝공백제거해서 그결과가 빈문자면 flase 있으면true
@@ -70,6 +73,9 @@ def clustering(adres_list, filna_list):
         # 단어 파싱 리스트
         word_list = vectorizer.get_feature_names_out()  # 벡터를 단어로바꿈
         # print("word_list ::: ", word_list.astype(str).tolist())
+
+        if data_length < cluster_number:
+            cluster_number = data_length
 
         # 군집화
         kmeans = KMeans(n_clusters=cluster_number, random_state=42)  # default42
@@ -114,6 +120,9 @@ def clustering(adres_list, filna_list):
     word_list = vectorizer.get_feature_names_out()  # 벡터를 단어로바꿈
     # print("word_list ::: ", word_list.astype(str).tolist())
     # print('단어파싱리스트 ::', word_list)
+
+    if data_length < cluster_number:
+        cluster_number = data_length
 
     # 군집화
     kmeans = KMeans(n_clusters=cluster_number, random_state=42) #default42
@@ -163,6 +172,8 @@ def clustering_lot(adres_list, filna_list):
             output_file = os.path.splitext(adres)[i] + '_clustered.xlsx'
             print(f'파일명 {i} :: ', adres)
             with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
+                cluster_number = 25
+                data_length = len(data)
                 for filna in filna_list:
                     data = pd.read_excel(adres, header=0, sheet_name=filna)
                     print(f'시트명 {filna} :: ', adres)
@@ -187,12 +198,12 @@ def clustering_lot(adres_list, filna_list):
                         continue
 
                     # 요약 내용이 5개 미만인 경우
-                    if len(data['제목']) < 5:
-                        print("데이터가 적어서 군집이 형성이 안돼요")
-                        data['cluster_label'] = ''
-                        data['tokens'] = ''
-                        data.to_excel(writer, index=False, sheet_name=f"{filna}")
-                        continue
+                    # if len(data['제목']) < 5:
+                    #     print("데이터가 적어서 군집이 형성이 안돼요")
+                    #     data['cluster_label'] = ''
+                    #     data['tokens'] = ''
+                    #     data.to_excel(writer, index=False, sheet_name=f"{filna}")
+                    #     continue
 
                     if not any(data['제목'].apply(lambda x: bool(x.strip()))):
                         print("제목이 없어서 요약내용으로 만들어요")
@@ -202,6 +213,9 @@ def clustering_lot(adres_list, filna_list):
                         # 단어 파싱 리스트
                         word_list = vectorizer.get_feature_names_out()  # 벡터를 단어로바꿈
                         # print("word_list ::: ", word_list.astype(str).tolist())
+
+                        if data_length < cluster_number:
+                            cluster_number = data_length
 
                         # 군집화
                         kmeans = KMeans(n_clusters=cluster_number, random_state=42)  # default42
@@ -243,6 +257,9 @@ def clustering_lot(adres_list, filna_list):
 
                     # 단어 파싱 리스트
                     word_list = vectorizer.get_feature_names_out()
+
+                    if data_length < cluster_number:
+                        cluster_number = data_length
 
                     # 군집화
                     kmeans = KMeans(n_clusters=cluster_number, random_state=42)
