@@ -3,6 +3,9 @@ import sys
 import warnings
 import pandas as pd
 import logging
+import string
+import re
+from collections import Counter
 
 from konlpy.tag import Okt
 from nltk.tokenize import word_tokenize
@@ -17,8 +20,7 @@ logging.basicConfig(level=logging.DEBUG,  # 로그 레벨 설정 (DEBUG, INFO, W
 logger = logging.getLogger(__name__)
 
 
-
-#파일1개 시트1개일때
+# 파일1개 시트1개일때
 def clustering(adres_list, filna_list):
     # utf-8, ascii 확인
     # encode = chardet.detect(adres_list)
@@ -48,10 +50,10 @@ def clustering(adres_list, filna_list):
         exit()
 
     # token용 배열생성
-    summary_data = pd.DataFrame(data["제목"]) #제목만 있는 새로운 프레임
-    summary_data = summary_data.assign(요약내용=data["요약 내용"]) #제목에 요약내용추가 컬럼2개짜리 프레임
+    summary_data = pd.DataFrame(data["제목"])  # 제목만 있는 새로운 프레임
+    summary_data = summary_data.assign(요약내용=data["요약 내용"])  # 제목에 요약내용추가 컬럼2개짜리 프레임
 
-    #빈칸 공백처리
+    # 빈칸 공백처리
     data['제목'].fillna('', inplace=True)
     # print("요약내용 있는지없는지 :: ", data['요약 내용'])
 
@@ -65,7 +67,7 @@ def clustering(adres_list, filna_list):
     #     exit()
 
     if not any(data['제목'].apply(lambda x: bool(x.strip()))):
-        #요약내용에 .apply(함수)를 적용시키는데 어떤함수냐 lambda x : x를 .strip시작끝공백제거해서 그결과가 빈문자면 flase 있으면true
+        # 요약내용에 .apply(함수)를 적용시키는데 어떤함수냐 lambda x : x를 .strip시작끝공백제거해서 그결과가 빈문자면 flase 있으면true
         print("제목이 없어서 요약내용으로 만들어요")
         vectorizer = TfidfVectorizer()  # 벡터 초기화
         X = vectorizer.fit_transform(data['요약 내용'])
@@ -104,11 +106,44 @@ def clustering(adres_list, filna_list):
         most_common_label = label_counts.idxmax()
 
         # 카운팅된 가장많은수를 가진 숫자를 0으로 0은 그숫자로 치환
-        data['cluster_label'] = data['cluster_label'] = data['cluster_label'].replace({most_common_label: 0, 0: most_common_label})
+        data['cluster_label'] = data['cluster_label'] = data['cluster_label'].replace(
+            {most_common_label: 0, 0: most_common_label})
 
         # 결과를 엑셀 파일로 저장
         output_file = os.path.splitext(adres_list)[0] + '_clustered.xlsx'
-        data.to_excel(output_file, index=False, sheet_name=filna_list)
+        # data.to_excel(output_file, index=False, sheet_name=filna_list)
+        with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
+            data.to_excel(writer, index=False, sheet_name=filna_list)
+
+            # 모든 단어를 하나의 리스트로 합치기
+            all_words = []
+            all_keywords = []
+            for tokens, keyword in zip(data['tokens'], data['키워드']):
+                all_words.extend(tokens)
+                all_keywords.extend([keyword] * len(tokens))
+
+            # 공백 제거 및 특정 단어 삭제
+            deleteWord = ['a', 'the', 'The', 'is', 'all', 'of', 's', 'for', 'in', 'With', 'with', 'Their', 'Its',
+                          'will',
+                          'Will', 'to', 't', 'To', 'has', 'It', 'Has', 'be', 'but', 'Be', 'But', 'and', 'And', 'Now',
+                          'now',
+                          'A',
+                          'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes', 'no',
+                          'No']
+            all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
+                         re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() and word not in deleteWord]
+            all_keywords = [keyword for word, keyword in zip(all_words, all_keywords) if word.strip()]
+
+            word_counts = Counter(all_words)
+
+            # 하나의 열로 만들어서 각 단어를 쉼표로 구분하여 각 행에 할당
+            data2 = pd.DataFrame({'수집일': [data['날짜 (yyyymmdd)'][0]] * len(all_words)})
+            data2 = data2.assign(키워드=all_words)
+            data2 = data2.assign(분류=all_keywords)
+            data2 = data2.assign(타입=all_keywords)
+            data2 = data2.assign(빈도수=[word_counts[word] for word in all_words], )
+            data2 = data2.groupby('키워드').apply(lambda x: x.loc[x['빈도수'].idxmax()]).reset_index(drop=True)
+            data2.to_excel(writer, index=False, sheet_name='news Keywords')
         exit()
 
     print('정상일때 로직시작 ::')
@@ -125,7 +160,7 @@ def clustering(adres_list, filna_list):
         cluster_number = data_length
 
     # 군집화
-    kmeans = KMeans(n_clusters=cluster_number, random_state=42) #default42
+    kmeans = KMeans(n_clusters=cluster_number, random_state=42)  # default42
     kmeans.fit(X)
 
     # 행별 군집플래그 부여
@@ -134,37 +169,69 @@ def clustering(adres_list, filna_list):
     # print('행별 군집플래그 ::', data['cluster_label'])
 
     # 행별 단어 모음 추가
-    parsing_row_words_list = [] #밑에서담을 빈배열초기화
+    parsing_row_words_list = []  # 밑에서담을 빈배열초기화
     row_count = len(summary_data['제목'])
     print('row_count ::', row_count)
 
     okt = Okt()
     for i in range(row_count):
-        nouns_row = okt.nouns(str(summary_data['제목'][i])) #명사만 추출해서담는데 (한국어)
+        nouns_row = okt.nouns(str(summary_data['제목'][i]))  # 명사만 추출해서담는데 (한국어)
         if not nouns_row:
-            nouns_row = word_tokenize(summary_data['제목'][i]) #추출안됐으면 word_tokenize로 다시돌려 (영어)
+            nouns_row = word_tokenize(summary_data['제목'][i])  # 추출안됐으면 word_tokenize로 다시돌려 (영어)
         parsing_row_words_list.append(nouns_row)
 
     data['tokens'] = parsing_row_words_list
     # print('parsing_row_words_list::::: ', parsing_row_words_list)
 
-    #라벨 카운팅
+
+    # 라벨 카운팅
     label_counts = data['cluster_label'].value_counts()
     most_common_label = label_counts.idxmax()
     # print('label_counts :: ', label_counts)
     # print('most_common_label :: ', most_common_label)
 
-    #카운팅된 가장많은수를 가진 숫자를 0으로 0은 그숫자로 치환
+    # 카운팅된 가장많은수를 가진 숫자를 0으로 0은 그숫자로 치환
     # data['cluster_label'] = data['cluster_label'].apply(lambda x: most_common_label if x == 0 else 0)
-    data['cluster_label'] = data['cluster_label'] = data['cluster_label'].replace({most_common_label: 0, 0: most_common_label})
+    data['cluster_label'] = data['cluster_label'] = data['cluster_label'].replace(
+        {most_common_label: 0, 0: most_common_label})
     # print('치환된 라벨값(0이항상많아야됨) :: ', data['cluster_label'])
 
+    # print('저장전data :: ', data)
     # 결과를 엑셀 파일로 저장
     output_file = os.path.splitext(adres_list)[0] + '_clustered.xlsx'
-    data.to_excel(output_file, index=False, sheet_name=filna_list)
+    # data.to_excel(output_file, index=False, sheet_name=filna_list)
+    with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
+        data.to_excel(writer, index=False, sheet_name=filna_list)
 
+        # 모든 단어를 하나의 리스트로 합치기
+        all_words = []
+        all_keywords = []
+        for tokens, keyword in zip(data['tokens'], data['키워드']):
+            all_words.extend(tokens)
+            all_keywords.extend([keyword] * len(tokens))
 
-#파일n개 시트n개일때
+        # 공백 제거 및 특정 단어 삭제
+        deleteWord = ['a', 'the', 'The', 'is', 'all', 'of', 's', 'for', 'in', 'With', 'with', 'Their', 'Its', 'will',
+                      'Will', 'to', 't', 'To', 'has', 'It', 'Has', 'be', 'but', 'Be', 'But', 'and', 'And', 'Now', 'now',
+                      'A',
+                      'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes', 'no',
+                      'No']
+        all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
+                     re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() and word not in deleteWord]
+        all_keywords = [keyword for word, keyword in zip(all_words, all_keywords) if word.strip()]
+
+        word_counts = Counter(all_words)
+
+        # 하나의 열로 만들어서 각 단어를 쉼표로 구분하여 각 행에 할당
+        data2 = pd.DataFrame({'수집일': [data['날짜 (yyyymmdd)'][0]]*len(all_words) })
+        data2 = data2.assign(키워드=all_words)
+        data2 = data2.assign(분류=all_keywords)
+        data2 = data2.assign(타입=all_keywords)
+        data2 = data2.assign(빈도수= [word_counts[word] for word in all_words],)
+        data2 = data2.groupby('키워드').apply(lambda x: x.loc[x['빈도수'].idxmax()]).reset_index(drop=True)
+        data2.to_excel(writer, index=False, sheet_name='news Keywords')
+
+# 파일n개 시트n개일때
 def clustering_lot(adres_list, filna_list):
     try:
         for adres in adres_list:
@@ -172,14 +239,11 @@ def clustering_lot(adres_list, filna_list):
             output_file = os.path.splitext(adres)[i] + '_clustered.xlsx'
             print(f'파일명 {i} :: ', adres)
             with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
-                cluster_number = 25
-                data_length = len(data)
                 for filna in filna_list:
                     data = pd.read_excel(adres, header=0, sheet_name=filna)
                     print(f'시트명 {filna} :: ', adres)
                     # 빈칸 공백처리
                     data['요약 내용'].fillna('', inplace=True)
-
                     # 추가 날짜컬럼
                     data["날짜 (yyyymmdd)"] = pd.DataFrame(data["날짜 (yyyymmdd)"])
                     if not pd.DataFrame(data["날짜 (yyyymmdd)"]).empty and len(str(data["날짜 (yyyymmdd)"][0])) > 8:
@@ -204,6 +268,8 @@ def clustering_lot(adres_list, filna_list):
                     #     data['tokens'] = ''
                     #     data.to_excel(writer, index=False, sheet_name=f"{filna}")
                     #     continue
+                    cluster_number = 25
+                    data_length = len(data)
 
                     if not any(data['제목'].apply(lambda x: bool(x.strip()))):
                         print("제목이 없어서 요약내용으로 만들어요")
@@ -249,6 +315,12 @@ def clustering_lot(adres_list, filna_list):
 
                         # 결과를 엑셀 파일로 저장
                         data.to_excel(writer, index=False, sheet_name=f"{filna}")
+
+                        # second_sheet_data = pd.DataFrame({
+                        #     '번호': range(1, len(data) + 1),
+                        #     '이름': ['' for _ in range(len(data))]
+                        # })
+                        # second_sheet_data.to_excel(writer, index=False, sheet_name='secondSheet')
                         continue
 
                     # 요약내용컬럼 벡터화
@@ -293,9 +365,42 @@ def clustering_lot(adres_list, filna_list):
 
                     # 결과를 엑셀 파일로 저장
                     data.to_excel(writer, index=False, sheet_name=f"{filna}")
+
+                # 모든 단어를 하나의 리스트로 합치기
+                all_words = []
+                all_keywords = []
+                for tokens, keyword in zip(data['tokens'], data['키워드']):
+                    all_words.extend(tokens)
+                    all_keywords.extend([keyword] * len(tokens))
+
+                # 공백 제거 및 특정 단어 삭제
+                deleteWord = ['a', 'the', 'The', 'is', 'all', 'of', 's', 'for', 'in', 'With', 'with', 'Their', 'Its',
+                              'will',
+                              'Will', 'to', 't', 'To', 'has', 'It', 'Has', 'be', 'but', 'Be', 'But', 'and', 'And',
+                              'Now', 'now',
+                              'A',
+                              'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes',
+                              'no',
+                              'No']
+                all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
+                             re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() and word not in deleteWord]
+                all_keywords = [keyword for word, keyword in zip(all_words, all_keywords) if word.strip()]
+
+                word_counts = Counter(all_words)
+
+                # 하나의 열로 만들어서 각 단어를 쉼표로 구분하여 각 행에 할당
+                data2 = pd.DataFrame({'수집일': [data['날짜 (yyyymmdd)'][0]] * len(all_words)})
+                data2 = data2.assign(키워드=all_words)
+                data2 = data2.assign(분류=all_keywords)
+                data2 = data2.assign(타입=all_keywords)
+                data2 = data2.assign(빈도수=[word_counts[word] for word in all_words], )
+                data2 = data2.groupby('키워드').apply(lambda x: x.loc[x['빈도수'].idxmax()]).reset_index(drop=True)
+                data2.to_excel(writer, index=False, sheet_name='news Keywords')
+
     except Exception as e:
         print("군집화중 오류발생")
         print(f"An unexpected error occurred: {str(e)}")
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 3:
