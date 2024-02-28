@@ -30,7 +30,7 @@ python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews 1.xlsx" "쌍�
 
 
 
-python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스 4.xlsx" "Result"
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes keyword 2.xlsx" "Result"
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes keyword 1.xlsx" --keyword "green chemical" "advanced materials chemical"
 
 

@@ -116,28 +116,35 @@ def clustering(adres_list, filna_list):
             data.to_excel(writer, index=False, sheet_name=filna_list)
 
             # 모든 단어를 하나의 리스트로 합치기
-            all_words = []
-            all_keywords = []
-            for tokens, keyword in zip(data['tokens'], data['키워드']):
+            all_words = []  # 토큰합친배열
+            all_keywords = []  # 원본키워드컬럼
+            all_usermail = []  # 유저이메일
+            for tokens, keyword, email in zip(data['tokens'], data['키워드'], data['유저 이메일']):
                 all_words.extend(tokens)
                 all_keywords.extend([keyword] * len(tokens))
+                all_usermail.extend([email] * len(tokens))
 
             # 공백 제거 및 특정 단어 삭제
             deleteWord = ['a', 'the', 'The', 'is', 'all', 'of', 's', 'for', 'in', 'With', 'with', 'Their', 'Its',
                           'will',
-                          'Will', 'to', 't', 'To', 'has', 'It', 'Has', 'be', 'but', 'Be', 'But', 'and', 'And', 'Now',
-                          'now',
+                          'Will', 'to', 't', 'To', 'has', 'It', 'Has', 'be', 'but', 'Be', 'But', 'and', 'And',
+                          'Now', 'now',
                           'A',
-                          'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes', 'no',
+                          'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes',
+                          'no',
                           'No']
+            # all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
+            #              re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() and word not in deleteWord]
             all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
-                         re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() and word not in deleteWord]
+                         len(re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip()) > 1 and word not in deleteWord]
             all_keywords = [keyword for word, keyword in zip(all_words, all_keywords) if word.strip()]
+            all_usermail = [email for word, email in zip(all_words, all_usermail) if word.strip()]
 
             word_counts = Counter(all_words)
 
             # 하나의 열로 만들어서 각 단어를 쉼표로 구분하여 각 행에 할당
             data2 = pd.DataFrame({'수집일': [data['날짜 (yyyymmdd)'][0]] * len(all_words)})
+            data2 = data2.assign(이메일=all_usermail)
             data2 = data2.assign(키워드=all_words)
             data2 = data2.assign(분류=all_keywords)
             data2 = data2.assign(타입=all_keywords)
@@ -204,26 +211,35 @@ def clustering(adres_list, filna_list):
         data.to_excel(writer, index=False, sheet_name=filna_list)
 
         # 모든 단어를 하나의 리스트로 합치기
-        all_words = []
-        all_keywords = []
-        for tokens, keyword in zip(data['tokens'], data['키워드']):
+        all_words = []  # 토큰합친배열
+        all_keywords = []  # 원본키워드컬럼
+        all_usermail = []  # 유저이메일
+        for tokens, keyword, email in zip(data['tokens'], data['키워드'], data['유저 이메일']):
             all_words.extend(tokens)
             all_keywords.extend([keyword] * len(tokens))
+            all_usermail.extend([email] * len(tokens))
 
         # 공백 제거 및 특정 단어 삭제
-        deleteWord = ['a', 'the', 'The', 'is', 'all', 'of', 's', 'for', 'in', 'With', 'with', 'Their', 'Its', 'will',
-                      'Will', 'to', 't', 'To', 'has', 'It', 'Has', 'be', 'but', 'Be', 'But', 'and', 'And', 'Now', 'now',
+        deleteWord = ['a', 'the', 'The', 'is', 'all', 'of', 's', 'for', 'in', 'With', 'with', 'Their', 'Its',
+                      'will',
+                      'Will', 'to', 't', 'To', 'has', 'It', 'Has', 'be', 'but', 'Be', 'But', 'and', 'And',
+                      'Now', 'now',
                       'A',
-                      'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes', 'no',
+                      'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes',
+                      'no',
                       'No']
+        # all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
+        #              re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() and word not in deleteWord]
         all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
-                     re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() and word not in deleteWord]
+                     len(re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip()) > 1 and word not in deleteWord]
         all_keywords = [keyword for word, keyword in zip(all_words, all_keywords) if word.strip()]
+        all_usermail = [email for word, email in zip(all_words, all_usermail) if word.strip()]
 
         word_counts = Counter(all_words)
 
         # 하나의 열로 만들어서 각 단어를 쉼표로 구분하여 각 행에 할당
-        data2 = pd.DataFrame({'수집일': [data['날짜 (yyyymmdd)'][0]]*len(all_words) })
+        data2 = pd.DataFrame({'수집일': [data['날짜 (yyyymmdd)'][0]] * len(all_words)})
+        data2 = data2.assign(이메일=all_usermail)
         data2 = data2.assign(키워드=all_words)
         data2 = data2.assign(분류=all_keywords)
         data2 = data2.assign(타입=all_keywords)
@@ -367,11 +383,13 @@ def clustering_lot(adres_list, filna_list):
                     data.to_excel(writer, index=False, sheet_name=f"{filna}")
 
                 # 모든 단어를 하나의 리스트로 합치기
-                all_words = []
-                all_keywords = []
-                for tokens, keyword in zip(data['tokens'], data['키워드']):
+                all_words = []  # 토큰합친배열
+                all_keywords = []  # 원본키워드컬럼
+                all_usermail = []  # 유저이메일
+                for tokens, keyword, email in zip(data['tokens'], data['키워드'], data['유저 이메일']):
                     all_words.extend(tokens)
                     all_keywords.extend([keyword] * len(tokens))
+                    all_usermail.extend([email] * len(tokens))
 
                 # 공백 제거 및 특정 단어 삭제
                 deleteWord = ['a', 'the', 'The', 'is', 'all', 'of', 's', 'for', 'in', 'With', 'with', 'Their', 'Its',
@@ -382,14 +400,18 @@ def clustering_lot(adres_list, filna_list):
                               'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes',
                               'no',
                               'No']
+                # all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
+                #              re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() and word not in deleteWord]
                 all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
-                             re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() and word not in deleteWord]
+                             len(re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip()) > 1 and word not in deleteWord]
                 all_keywords = [keyword for word, keyword in zip(all_words, all_keywords) if word.strip()]
+                all_usermail = [email for word, email in zip(all_words, all_usermail) if word.strip()]
 
                 word_counts = Counter(all_words)
 
                 # 하나의 열로 만들어서 각 단어를 쉼표로 구분하여 각 행에 할당
                 data2 = pd.DataFrame({'수집일': [data['날짜 (yyyymmdd)'][0]] * len(all_words)})
+                data2 = data2.assign(이메일=all_usermail)
                 data2 = data2.assign(키워드=all_words)
                 data2 = data2.assign(분류=all_keywords)
                 data2 = data2.assign(타입=all_keywords)
