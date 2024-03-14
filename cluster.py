@@ -133,12 +133,11 @@ def clustering(adres_list, filna_list):
                           'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes',
                           'no',
                           'No']
+
             # all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
-            #              re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() and word not in deleteWord]
-            all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
-                         len(re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip()) > 1 and word not in deleteWord]
-            all_keywords = [keyword for word, keyword in zip(all_words, all_keywords) if word.strip()]
-            all_usermail = [email for word, email in zip(all_words, all_usermail) if word.strip()]
+            #              len(re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip()) > 1 and word not in deleteWord]
+            # all_keywords = [keyword for word, keyword in zip(all_words, all_keywords) if word.strip()]
+            # all_usermail = [email for word, email in zip(all_words, all_usermail) if word.strip()]
 
             word_counts = Counter(all_words)
 
@@ -149,8 +148,11 @@ def clustering(adres_list, filna_list):
             data2 = data2.assign(분류=all_keywords)
             data2 = data2.assign(타입=all_keywords)
             data2 = data2.assign(빈도수=[word_counts[word] for word in all_words], )
-            data2 = data2.groupby('키워드').apply(lambda x: x.loc[x['빈도수'].idxmax()]).reset_index(drop=True)
-            data2.to_excel(writer, index=False, sheet_name='news Keywords')
+            # data2 = data2.groupby('키워드').apply(lambda x: x.loc[x['빈도수'].idxmax()]).reset_index(drop=True)
+            data2_no_duplicates = data2.drop_duplicates(subset=['이메일', '키워드'])
+            data2_filtered = data2_no_duplicates[data2_no_duplicates['키워드'].str.len() > 1]
+            data2_filtered = data2_filtered[~data2_filtered['키워드'].isin(deleteWord)]
+            data2_filtered.to_excel(writer, index=False, sheet_name='news Keywords')
         exit()
 
     print('정상일때 로직시작 ::')
@@ -216,6 +218,7 @@ def clustering(adres_list, filna_list):
         all_usermail = []  # 유저이메일
         for tokens, keyword, email in zip(data['tokens'], data['키워드'], data['유저 이메일']):
             all_words.extend(tokens)
+            # 각 토큰에 해당하는 키워드와 이메일을 추가
             all_keywords.extend([keyword] * len(tokens))
             all_usermail.extend([email] * len(tokens))
 
@@ -228,12 +231,12 @@ def clustering(adres_list, filna_list):
                       'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes',
                       'no',
                       'No']
+
         # all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
-        #              re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() and word not in deleteWord]
-        all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
-                     len(re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip()) > 1 and word not in deleteWord]
-        all_keywords = [keyword for word, keyword in zip(all_words, all_keywords) if word.strip()]
-        all_usermail = [email for word, email in zip(all_words, all_usermail) if word.strip()]
+        #              len(re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip()) > 1 and word not in deleteWord]
+        # all_keywords = [keyword for word, keyword in zip(all_words, all_keywords) if word.strip()]
+        # all_usermail = [email for word, email in zip(all_words, all_usermail) if word.strip()]
+        # 이 중복제거속에서 에러가 남
 
         word_counts = Counter(all_words)
 
@@ -243,9 +246,19 @@ def clustering(adres_list, filna_list):
         data2 = data2.assign(키워드=all_words)
         data2 = data2.assign(분류=all_keywords)
         data2 = data2.assign(타입=all_keywords)
-        data2 = data2.assign(빈도수= [word_counts[word] for word in all_words],)
-        data2 = data2.groupby('키워드').apply(lambda x: x.loc[x['빈도수'].idxmax()]).reset_index(drop=True)
-        data2.to_excel(writer, index=False, sheet_name='news Keywords')
+        data2 = data2.assign(빈도수=[word_counts[word] for word in all_words],)
+        # data2 = data2.groupby('키워드').apply(lambda x: x.loc[x['빈도수'].idxmax()]).reset_index(drop=True)
+        # data2 = data2[data2['키워드'].str.len() > 1]
+        # data2 = data2[~data2['키워드'].isin(deleteWord)]
+        # data2 = data2.drop_duplicates(subset=['키워드'])
+        # data2 = data2.groupby(['이메일', '키워드']).size().reset_index(name='count')
+        # data2 = data2.drop_duplicates(subset=['이메일', '키워드'], keep='first')
+        data2_no_duplicates = data2.drop_duplicates(subset=['이메일', '키워드'])
+        data2_filtered = data2_no_duplicates[data2_no_duplicates['키워드'].str.len() > 1]
+        data2_filtered = data2_filtered[~data2_filtered['키워드'].isin(deleteWord)]
+        # 쳇지피티 중복제거 코드
+
+        data2_filtered.to_excel(writer, index=False, sheet_name='news Keywords')
 
 # 파일n개 시트n개일때
 def clustering_lot(adres_list, filna_list):
@@ -400,12 +413,11 @@ def clustering_lot(adres_list, filna_list):
                               'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes',
                               'no',
                               'No']
+
                 # all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
-                #              re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() and word not in deleteWord]
-                all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
-                             len(re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip()) > 1 and word not in deleteWord]
-                all_keywords = [keyword for word, keyword in zip(all_words, all_keywords) if word.strip()]
-                all_usermail = [email for word, email in zip(all_words, all_usermail) if word.strip()]
+                #              len(re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip()) > 1 and word not in deleteWord]
+                # all_keywords = [keyword for word, keyword in zip(all_words, all_keywords) if word.strip()]
+                # all_usermail = [email for word, email in zip(all_words, all_usermail) if word.strip()]
 
                 word_counts = Counter(all_words)
 
@@ -416,7 +428,10 @@ def clustering_lot(adres_list, filna_list):
                 data2 = data2.assign(분류=all_keywords)
                 data2 = data2.assign(타입=all_keywords)
                 data2 = data2.assign(빈도수=[word_counts[word] for word in all_words], )
-                data2 = data2.groupby('키워드').apply(lambda x: x.loc[x['빈도수'].idxmax()]).reset_index(drop=True)
+                # data2 = data2.groupby('키워드').apply(lambda x: x.loc[x['빈도수'].idxmax()]).reset_index(drop=True)
+                data2_no_duplicates = data2.drop_duplicates(subset=['이메일', '키워드'])
+                data2_filtered = data2_no_duplicates[data2_no_duplicates['키워드'].str.len() > 1]
+                data2_filtered = data2_filtered[~data2_filtered['키워드'].isin(deleteWord)]
                 data2.to_excel(writer, index=False, sheet_name='news Keywords')
 
     except Exception as e:
