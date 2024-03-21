@@ -230,7 +230,7 @@ def clustering(adres_list, filna_list):
                       'A',
                       'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes',
                       'no',
-                      'No']
+                      'No', 'at', 'New', 'Last']
 
         # all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
         #              len(re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip()) > 1 and word not in deleteWord]
@@ -412,7 +412,7 @@ def clustering_lot(adres_list, filna_list):
                               'A',
                               'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes',
                               'no',
-                              'No']
+                              'No', 'at', 'New', 'Last']
 
                 # all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
                 #              len(re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip()) > 1 and word not in deleteWord]
