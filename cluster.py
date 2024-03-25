@@ -230,7 +230,7 @@ def clustering(adres_list, filna_list):
                       'A',
                       'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes',
                       'no',
-                      'No', 'at', 'New', 'Last']
+                      'No', 'at', 'New', 'Last', 'Is', 'an', 'Do', 'We', 'What']
 
         # all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
         #              len(re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip()) > 1 and word not in deleteWord]
@@ -412,7 +412,7 @@ def clustering_lot(adres_list, filna_list):
                               'A',
                               'on', 'On', 'More', 'more', 'then', 'Then', 'That', 'that', 'Why', 'why', 'Yes', 'yes',
                               'no',
-                              'No', 'at', 'New', 'Last']
+                              'No', 'at', 'New', 'Last', 'Is', 'an', 'Do', 'We', 'What']
 
                 # all_words = [re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip() for word in all_words if
                 #              len(re.sub(r'[^a-zA-Z가-힣\s]', '', word).strip()) > 1 and word not in deleteWord]
@@ -432,7 +432,7 @@ def clustering_lot(adres_list, filna_list):
                 data2_no_duplicates = data2.drop_duplicates(subset=['이메일', '키워드'])
                 data2_filtered = data2_no_duplicates[data2_no_duplicates['키워드'].str.len() > 1]
                 data2_filtered = data2_filtered[~data2_filtered['키워드'].isin(deleteWord)]
-                data2.to_excel(writer, index=False, sheet_name='news Keywords')
+                data2_filtered.to_excel(writer, index=False, sheet_name='news Keywords')
 
     except Exception as e:
         print("군집화중 오류발생")
