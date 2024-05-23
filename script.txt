@@ -8,6 +8,8 @@ python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews.xlsx" "쌍용
 
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes keyword.xlsx" "Result"
 
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스 8.xlsx" "Result"
+
 
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews.xlsx" --keyword "쌍용씨앤비" "테스트"
 
@@ -32,7 +34,7 @@ python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_GoogleNews 1.xlsx" "쌍�
 
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_네이버뉴스 5.xlsx" "Result"
 
-python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes keyword 2.xlsx" "Result"
+python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes keyword.xlsx" "Result"
 python main.py "C:/Users/Rainbow Brain/Desktop/(Result)_nytimes keyword 1.xlsx" --keyword "green chemical" "advanced materials chemical"
 
 

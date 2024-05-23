@@ -29,6 +29,9 @@ def clustering(adres_list, filna_list):
     # 데이터불러옴
     data = pd.read_excel(adres_list, header=0, sheet_name=filna_list)
 
+    data.drop_duplicates(subset=['제목'], keep='last', inplace=True)
+    data.reset_index(drop=True, inplace=True)
+
     cluster_number = 25
     data_length = len(data)
 
@@ -52,19 +55,10 @@ def clustering(adres_list, filna_list):
     # token용 배열생성
     summary_data = pd.DataFrame(data["제목"])  # 제목만 있는 새로운 프레임
     summary_data = summary_data.assign(요약내용=data["요약 내용"])  # 제목에 요약내용추가 컬럼2개짜리 프레임
+    print('ㅁㄴㅇㄻㄴㅇㅁㄴㅇㄹ :: ', len(summary_data))
 
     # 빈칸 공백처리
     data['제목'].fillna('', inplace=True)
-    # print("요약내용 있는지없는지 :: ", data['요약 내용'])
-
-    # 요약 내용이 5개 미만인 경우
-    # if len(data['제목']) < 5:
-    #     print("데이터가 적어서 군집이 형성이 안돼요")
-    #     data['cluster_label'] = ''
-    #     data['tokens'] = ''
-    #     output_file = os.path.splitext(adres_list)[0] + '_clustered.xlsx'
-    #     data.to_excel(output_file, index=False, sheet_name=filna_list)
-    #     exit()
 
     if not any(data['제목'].apply(lambda x: bool(x.strip()))):
         # 요약내용에 .apply(함수)를 적용시키는데 어떤함수냐 lambda x : x를 .strip시작끝공백제거해서 그결과가 빈문자면 flase 있으면true
@@ -163,10 +157,9 @@ def clustering(adres_list, filna_list):
     # 단어 파싱 리스트
     word_list = vectorizer.get_feature_names_out()  # 벡터를 단어로바꿈
     # print("word_list ::: ", word_list.astype(str).tolist())
-    # print('단어파싱리스트 ::', word_list)
 
-    if data_length < cluster_number:
-        cluster_number = data_length
+    # if data_length > cluster_number:
+    #     cluster_number = int(data_length/3)
 
     # 군집화
     kmeans = KMeans(n_clusters=cluster_number, random_state=42)  # default42
@@ -192,21 +185,15 @@ def clustering(adres_list, filna_list):
     data['tokens'] = parsing_row_words_list
     # print('parsing_row_words_list::::: ', parsing_row_words_list)
 
-
     # 라벨 카운팅
     label_counts = data['cluster_label'].value_counts()
     most_common_label = label_counts.idxmax()
-    # print('label_counts :: ', label_counts)
-    # print('most_common_label :: ', most_common_label)
 
     # 카운팅된 가장많은수를 가진 숫자를 0으로 0은 그숫자로 치환
     # data['cluster_label'] = data['cluster_label'].apply(lambda x: most_common_label if x == 0 else 0)
     data['cluster_label'] = data['cluster_label'] = data['cluster_label'].replace(
         {most_common_label: 0, 0: most_common_label})
-    # print('치환된 라벨값(0이항상많아야됨) :: ', data['cluster_label'])
 
-    # print('저장전data :: ', data)
-    # 결과를 엑셀 파일로 저장
     output_file = os.path.splitext(adres_list)[0] + '_clustered.xlsx'
     # data.to_excel(output_file, index=False, sheet_name=filna_list)
     with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
@@ -271,6 +258,11 @@ def clustering_lot(adres_list, filna_list):
                 for filna in filna_list:
                     data = pd.read_excel(adres, header=0, sheet_name=filna)
                     print(f'시트명 {filna} :: ', adres)
+
+                    # data.drop_duplicates(subset='제목', keep='last', inplace=True)
+                    data.drop_duplicates(subset=['제목'], keep='last', inplace=True)
+                    data.reset_index(drop=True, inplace=True)
+
                     # 빈칸 공백처리
                     data['요약 내용'].fillna('', inplace=True)
                     # 추가 날짜컬럼
@@ -290,13 +282,6 @@ def clustering_lot(adres_list, filna_list):
                         data.to_excel(writer, index=False, sheet_name=f"{filna}")
                         continue
 
-                    # 요약 내용이 5개 미만인 경우
-                    # if len(data['제목']) < 5:
-                    #     print("데이터가 적어서 군집이 형성이 안돼요")
-                    #     data['cluster_label'] = ''
-                    #     data['tokens'] = ''
-                    #     data.to_excel(writer, index=False, sheet_name=f"{filna}")
-                    #     continue
                     cluster_number = 25
                     data_length = len(data)
 
@@ -332,7 +317,6 @@ def clustering_lot(adres_list, filna_list):
                             parsing_row_words_list.append(nouns_row)
 
                         data['tokens'] = parsing_row_words_list
-                        # print('parsing_row_words_list::::: ', parsing_row_words_list)
 
                         # 라벨 카운팅
                         label_counts = data['cluster_label'].value_counts()
@@ -359,8 +343,8 @@ def clustering_lot(adres_list, filna_list):
                     # 단어 파싱 리스트
                     word_list = vectorizer.get_feature_names_out()
 
-                    if data_length < cluster_number:
-                        cluster_number = data_length
+                    # if data_length > cluster_number:
+                    #     cluster_number = int(data_length/3)
 
                     # 군집화
                     kmeans = KMeans(n_clusters=cluster_number, random_state=42)
@@ -428,7 +412,6 @@ def clustering_lot(adres_list, filna_list):
                 data2 = data2.assign(분류=all_keywords)
                 data2 = data2.assign(타입=all_keywords)
                 data2 = data2.assign(빈도수=[word_counts[word] for word in all_words], )
-                # data2 = data2.groupby('키워드').apply(lambda x: x.loc[x['빈도수'].idxmax()]).reset_index(drop=True)
                 data2_no_duplicates = data2.drop_duplicates(subset=['이메일', '키워드'])
                 data2_filtered = data2_no_duplicates[data2_no_duplicates['키워드'].str.len() > 1]
                 data2_filtered = data2_filtered[~data2_filtered['키워드'].isin(deleteWord)]
